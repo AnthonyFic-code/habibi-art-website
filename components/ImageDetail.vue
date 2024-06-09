@@ -7,6 +7,7 @@ const savingImg = ref(false)
 
 // filter
 const filter = ref(false)
+const isOpen = ref(false)
 const contrast = ref(100)
 const blur = ref(0)
 const hueRotate = ref(0)
@@ -23,7 +24,7 @@ const { images, uploadImage } = useFile()
 const { loggedIn } = useUserSession()
 
 const isSmallScreen = useMediaQuery('(max-width: 1024px)')
-const { currentIndex, isFirstImg, isLastImg, downloadImage, applyFilters, initSwipe, convertBase64ToFile, magnifierImage } = useImageGallery()
+const { currentIndex, isFirstImg, isLastImg, downloadImage, initSwipe, convertBase64ToFile, magnifierImage } = useImageGallery()
 
 const active = useState()
 const route = useRoute()
@@ -51,18 +52,6 @@ onKeyStroke('ArrowRight', () => {
     router.push(`/detail/${images.value![currentIndex.value + 1].pathname.split('.')[0]}`)
 })
 
-function resetFilter() {
-  contrast.value = 100
-  blur.value = 0
-  invert.value = 0
-  saturate.value = 100
-  hueRotate.value = 0
-  sepia.value = 0
-  filterUpdated.value = false
-  magnifier.value = false
-  zoomFactor.value = 1
-}
-
 function cancelFilter() {
   filter.value = false
 
@@ -73,17 +62,11 @@ async function saveImage() {
   if (filterUpdated.value && imageEl.value) {
     savingImg.value = true
 
-    const modifiedImage = await applyFilters(imageEl.value, contrast.value, blur.value, invert.value, saturate.value, hueRotate.value, sepia.value)
-
-    const imageToUpload = await convertBase64ToFile(modifiedImage, image)
+    const imageToUpload = await convertBase64ToFile(imageEl.value, image)
 
     await uploadImage(imageToUpload, true).finally(() => savingImg.value = false)
   }
 }
-
-watch([contrast, blur, invert, saturate, hueRotate, sepia], () => {
-  filterUpdated.value = true
-})
 
 onMounted(() => {
   initSwipe(imageEl)
@@ -102,80 +85,7 @@ onMounted(() => {
     </div>
 
     <UContainer class="overflow-x-hidden relative flex items-center justify-center">
-      <ImageFilters
-        class="absolute md:mt-36 transition-transform duration-200"
-        :class="filter ? 'translate-x-0 right-8 ' : 'translate-x-full right-0'"
-        @reset-filter="resetFilter"
-        @close-filter="filter = false"
-      >
-        <div
-          class="flex flex-col gap-y-12 pb-6 h-[60dvh]"
-          :class="filter ? 'block opacity-100' : 'hidden opacity-0'"
-        >
-          <div class="flex flex-col gap-y-4">
-            <!-- filters list -->
-            <div class="flex gap-x-4 justify-between items-center pb-4">
-              <span class="text-white w-40">Fit</span>
-              <USelectMenu
-                v-model="objectFitSelected"
-                :options="objectsFit"
-                class="!w-52 mr-4"
-              />
-            </div>
 
-            <div class="flex gap-x-4 w-full justify-end pr-4 pb-4">
-              <UCheckbox
-                v-model="magnifier"
-                name="magnifier"
-                label="Magnifier"
-                color="primary"
-                :ui="{ label: 'text-gray-300 dark:text-gray-300' }"
-              />
-              <UIcon
-                name="i-heroicons-magnifying-glass-solid"
-                class="w-5 h-5 text-gray-300"
-              />
-            </div>
-
-            <UGauge
-              v-if="magnifier"
-              v-model="zoomFactor"
-              :max="4"
-              title="Zoom level"
-            />
-            <UGauge
-              v-model="sepia"
-              :max="100"
-              title="Sepia"
-            />
-            <UGauge
-              v-model="hueRotate"
-              :max="180"
-              title="Hue-rotate"
-            />
-            <UGauge
-              v-model="saturate"
-              :max="100"
-              title="Saturate"
-            />
-            <UGauge
-              v-model="invert"
-              :max="100"
-              title="Invert"
-            />
-            <UGauge
-              v-model="contrast"
-              :max="200"
-              title="Contrast"
-            />
-            <UGauge
-              v-model="blur"
-              :max="5"
-              title="Blur"
-            />
-          </div>
-        </div>
-      </ImageFilters>
 
       <div class="h-full w-full max-w-7xl flex items-center justify-center relative mx-auto">
         <!-- Bottom menu -->
@@ -186,7 +96,8 @@ onMounted(() => {
         >
           <template #description>
             <p class="bottom-menu-description">
-              Nuxt Image Gallery
+              <!-- A name should be placed here? -->
+               sample
             </p>
           </template>
           <!-- Filters -->
@@ -214,7 +125,36 @@ onMounted(() => {
                 </UTooltip>
                 <!-- open filters -->
                 <!-- v-if="loggedIn"  -->
-                <UTooltip text="Add filters">
+
+                <!-- Use this to view pricing? -->
+                  <USlideover
+                    v-model="isOpen"
+                    class="flex items-center justify-center"
+                    side="left"
+                  >
+                    <LoginForm
+                      class="z-50 bg-gray-800 rounded-md"
+                      @close-login="isOpen = false"
+                    />
+                    <UButton
+                      icon="i-heroicons-x-mark"
+                      class="absolute right-4 top-4"
+                      @click="isOpen = false"
+                    />
+                  </USlideover>
+                
+                  <UTooltip text="View pricing information">
+                    <UButton
+                      variant="ghost"
+                      color="gray"
+                      size="md"
+                      icon="i-heroicons-currency-dollar-20-solid"
+                      aria-label="View pricing information"
+                      class="hidden lg:flex"
+                      @click="isOpen = true"
+                    />
+                  </UTooltip>
+                <!-- <UTooltip text="Add filters">
                   <UButton
                     variant="ghost"
                     color="gray"
@@ -224,7 +164,7 @@ onMounted(() => {
                     class="hidden lg:flex"
                     @click="filter = true"
                   />
-                </UTooltip>
+                </UTooltip> -->
                 <!-- open original -->
                 <UTooltip text="Open in a new tab">
                   <UButton
@@ -246,8 +186,9 @@ onMounted(() => {
                     size="md"
                     class="hidden md:flex"
                     aria-label="Download original or modified image"
-                    @click="downloadImage(image.pathname, imageEl, contrast, blur, invert, saturate, hueRotate, sepia)"
+                    @click="downloadImage(image.pathname, imageEl, 100, 0, 0, 100, 0, 0)" 
                   />
+                  <!--contrast, blur, invert, saturate, hueRotate, sepia-->
                 </UTooltip>
               </div>
 
@@ -344,7 +285,6 @@ onMounted(() => {
                     :alt="image.pathname"
                     class="rounded object-contain transition-all duration-200 block"
                     :class="[{ imageEl: route.params.slug[0] === image.pathname.split('.')[0] }, filter ? 'w-[80%] ml-[12px]' : 'w-full']"
-                    :style="`filter: contrast(${contrast}%) blur(${blur}px) invert(${invert}%) saturate(${saturate}%) hue-rotate(${hueRotate}deg) sepia(${sepia}%); object-fit:${objectFitSelected.toLowerCase()};`"
                     crossorigin="anonymous"
                     @mousemove="magnifier ? magnifierImage($event, imageContainer, imageEl, magnifierEl!, zoomFactor) : () => {}"
                   >

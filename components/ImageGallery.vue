@@ -86,17 +86,17 @@ async function clearSession() {
         <template #description>
           <div class="flex gap-x-4 items-center">
             <p class="bottom-menu-description text-sm sm:text-base leading-tight sm:leading-normal">
-              Media Gallery template
+              Glenn Habibi's Art Website
             </p>
             <NuxtLink
               to="https://github.com/Flosciante/nuxt-image-gallery"
               target="blank"
               class="flex items-center"
             >
-              <UIcon
+              <!-- <UIcon
                 name="i-simple-icons-github"
                 class="w-5 h-5"
-              />
+              /> -->
             </NuxtLink>
           </div>
         </template>

@@ -5,7 +5,7 @@ export default eventHandler(async (event) => {
   return hubBlob().handleUpload(event, {
     multiple: false,
     addRandomSuffix: true,
-    maxSize: '8MB',
+    maxSize: '64MB',
     types: ['image/jpeg', 'image/png', 'image/gif', 'image/heic', 'image/webp', 'image/jpg']
   })
 })

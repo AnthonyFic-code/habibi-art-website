@@ -1,4 +1,5 @@
 <script setup lang="ts">
+
 const bottomMenu = ref()
 const imageEl = ref<HTMLImageElement>()
 const magnifierEl = ref<HTMLElement>()
@@ -7,17 +8,10 @@ const savingImg = ref(false)
 
 // filter
 const filter = ref(false)
-const isOpen = ref(false)
-const contrast = ref(100)
-const blur = ref(0)
-const hueRotate = ref(0)
-const invert = ref(0)
-const saturate = ref(100)
-const sepia = ref(0)
+const isViewingInfo = ref(false)
+const isEditing = ref(false)
 const magnifier = ref(false)
 const zoomFactor = ref(1)
-const objectsFit = ref(['Contain', 'Cover', 'Scale-down', 'Fill', 'None'])
-const objectFitSelected = ref(objectsFit.value[0])
 const filterUpdated = ref(false)
 
 const { images, uploadImage } = useFile()
@@ -29,10 +23,24 @@ const { currentIndex, isFirstImg, isLastImg, downloadImage, initSwipe, convertBa
 const active = useState()
 const route = useRoute()
 const router = useRouter()
+const toast = useToast()
 
 const image = computed(() => {
   return images.value!.filter((file: BlobObject) => file.pathname.split('.')[0] === route.params.slug[0])[0]
 })
+const imageInfoObject = await $fetch('/api/getImageInfo', {
+    method: 'POST',
+    body: { text: route.params.slug[0] }
+  })
+    .catch((err) => {
+      toast.add({
+        title: `Error ${err.statusCode}`,
+        description: `${err.data?.message || err.message}. Please try again`,
+        color: 'red'
+      })
+    }) || {"name":undefined,"description":undefined}
+const imageTitle = ref(imageInfoObject.name)
+const imageDescription = ref(imageInfoObject.description)
 
 onKeyStroke('Escape', () => {
   router.push('/')
@@ -51,22 +59,6 @@ onKeyStroke('ArrowRight', () => {
   else
     router.push(`/detail/${images.value![currentIndex.value + 1].pathname.split('.')[0]}`)
 })
-
-function cancelFilter() {
-  filter.value = false
-
-  resetFilter()
-}
-
-async function saveImage() {
-  if (filterUpdated.value && imageEl.value) {
-    savingImg.value = true
-
-    const imageToUpload = await convertBase64ToFile(imageEl.value, image)
-
-    await uploadImage(imageToUpload, true).finally(() => savingImg.value = false)
-  }
-}
 
 onMounted(() => {
   initSwipe(imageEl)
@@ -97,7 +89,7 @@ onMounted(() => {
           <template #description>
             <p class="bottom-menu-description">
               <!-- A name should be placed here? -->
-               sample
+               <p>{{ imageTitle }}</p>
             </p>
           </template>
           <!-- Filters -->
@@ -126,32 +118,64 @@ onMounted(() => {
                 <!-- open filters -->
                 <!-- v-if="loggedIn"  -->
 
-                <!-- Use this to view pricing? -->
-                  <USlideover
-                    v-model="isOpen"
+                  <UModal
+                    v-model="isEditing"
                     class="flex items-center justify-center"
                     side="left"
                   >
-                    <LoginForm
+                    <EditingForm
                       class="z-50 bg-gray-800 rounded-md"
-                      @close-login="isOpen = false"
+                      @closeEditor="isEditing = false"
                     />
                     <UButton
                       icon="i-heroicons-x-mark"
                       class="absolute right-4 top-4"
-                      @click="isOpen = false"
+                      @click="isEditing = false"
                     />
-                  </USlideover>
-                
-                  <UTooltip text="View pricing information">
+                  </UModal>
+
+                  <UTooltip text="Edit metadata">
+                    <UButton
+                      v-if="loggedIn"  
+                      variant="ghost"
+                      color="green"
+                      size="md"
+                      icon="i-heroicons-pencil-square-20-solid"
+                      aria-label="Open metadata editor"
+                      class="hidden lg:flex"
+                      @click="isEditing = true"
+                    />
+                    <UButton
+                      v-else
+                    />
+                  </UTooltip>
+
+                <!-- Use this to view pricing? -->
+                <UModal
+                    v-model="isViewingInfo"
+                    class="flex items-center justify-center"
+                    side="left"
+                  >
+                    <DescriptionInformation
+                      class="z-50 bg-gray-800 rounded-md"
+                      @close-login="isViewingInfo = false"
+                    />
+                    <UButton
+                      icon="i-heroicons-x-mark"
+                      class="absolute right-4 top-4"
+                      @click="isViewingInfo = false"
+                    />
+                  </UModal>
+
+                  <UTooltip text="View description">
                     <UButton
                       variant="ghost"
                       color="gray"
                       size="md"
-                      icon="i-heroicons-currency-dollar-20-solid"
-                      aria-label="View pricing information"
+                      icon="i-heroicons-information-circle-20-solid"
+                      aria-label="View description and pricing information"
                       class="hidden lg:flex"
-                      @click="isOpen = true"
+                      @click="isViewingInfo = true"
                     />
                   </UTooltip>
                 <!-- <UTooltip text="Add filters">
@@ -166,60 +190,6 @@ onMounted(() => {
                   />
                 </UTooltip> -->
                 <!-- open original -->
-                <UTooltip text="Open in a new tab">
-                  <UButton
-                    variant="ghost"
-                    color="gray"
-                    icon="i-heroicons-arrow-up-right-20-solid"
-                    size="md"
-                    :to="`/images/${image.pathname}`"
-                    target="_blank"
-                    aria-label="Open original image"
-                  />
-                </UTooltip>
-                <!-- download original or modified image -->
-                <UTooltip text="Download">
-                  <UButton
-                    variant="ghost"
-                    color="gray"
-                    icon="i-heroicons-arrow-down-tray-20-solid"
-                    size="md"
-                    class="hidden md:flex"
-                    aria-label="Download original or modified image"
-                    @click="downloadImage(image.pathname, imageEl, 100, 0, 0, 100, 0, 0)" 
-                  />
-                  <!--contrast, blur, invert, saturate, hueRotate, sepia-->
-                </UTooltip>
-              </div>
-
-              <div
-                v-else
-                class="flex gap-x-2 items-center"
-              >
-                <UTooltip
-                  v-if="loggedIn"
-                  text="Save filtered image"
-                >
-                  <UButton
-                    :loading="savingImg"
-                    variant="ghost"
-                    color="gray"
-                    icon="i-heroicons-check-20-solid"
-                    class="hidden md:flex"
-                    aria-label="Upload original or modified image to gallery"
-                    @click="saveImage()"
-                  />
-                </UTooltip>
-                <UTooltip text="Cancel filters">
-                  <UButton
-                    variant="ghost"
-                    color="gray"
-                    icon="i-heroicons-x-mark"
-                    class="hidden md:flex"
-                    aria-label="Upload original or modified image to gallery"
-                    @click="cancelFilter()"
-                  />
-                </UTooltip>
               </div>
             </div>
           </template>

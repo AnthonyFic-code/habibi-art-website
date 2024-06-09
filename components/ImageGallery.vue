@@ -59,7 +59,7 @@ async function clearSession() {
       ref="dropZoneRef"
       class="relative h-screen gap-[22px] p-4"
     >
-      <USlideover
+      <UModal
         v-model="isOpen"
         class="flex items-center justify-center"
         side="left"
@@ -73,7 +73,7 @@ async function clearSession() {
           class="absolute right-4 top-4"
           @click="isOpen = false"
         />
-      </USlideover>
+      </UModal>
 
       <BottomMenu class="bottom-menu">
         <template #logo>
@@ -145,14 +145,8 @@ async function clearSession() {
         </div>
         <div
           v-else
-          class="text-2xl text-white flex flex-col gap-y-4 items-center justify-center h-full w-full pb-8"
         >
-          <h1 class="font-medium text-5xl">
-            Welcome to image gallery
-          </h1>
-          <p class="text-gray-400">
-            You must be logged in to start uploading images
-          </p>
+          
         </div>
 
         <ul

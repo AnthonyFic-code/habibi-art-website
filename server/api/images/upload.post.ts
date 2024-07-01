@@ -10,6 +10,6 @@ export default eventHandler(async (event) => {
     types: ['image/jpeg', 'image/png', 'image/gif', 'image/heic', 'image/webp', 'image/jpg']
   })
   const fileName = uploadObj[0].pathname.split('.')[0]
-  hubKV().set(fileName, {"name": fileName, "description": "Sample description; needs to be updated."})
+  hubKV().set(fileName, {"name": fileName, "description": "Sample description; needs to be updated.", "status": "Unset"})
   return uploadObj
 })

@@ -5,6 +5,7 @@ const route = useRoute()
 const chosenFile = ref(route.params.slug[0])
 const newImageName = ref('')
 const newDescription = ref('')
+const newStatus = ref('')
 const loading = ref(false)
 
 const toast = useToast()
@@ -16,7 +17,8 @@ async function login() {
       file: chosenFile.value,
       newArgs: {
         name: newImageName.value,
-        description: newDescription.value
+        description: newDescription.value,
+        status: newStatus.value
       }
      }
   })
@@ -47,14 +49,21 @@ async function login() {
       v-model="newImageName"
       type="text"
       placeholder="Enter name"
-      icon="i-heroicons-key"
+      icon="i-heroicons-tag"
       class="!w-60"
     />
     <UInput
       v-model="newDescription"
       type="text"
       placeholder="Enter description"
-      icon="i-heroicons-key"
+      icon="i-heroicons-newspaper"
+      class="!w-60"
+    />
+    <UInput
+      v-model="newStatus"
+      type="text"
+      placeholder="Enter status ('sold' or $ price)"
+      icon="i-heroicons-currency-dollar"
       class="!w-60"
     />
 
@@ -66,7 +75,6 @@ async function login() {
       variant="ghost"
       class="px-4"
       size="lg"
-      :disabled="!newImageName"
     />
   </form>
 </template>

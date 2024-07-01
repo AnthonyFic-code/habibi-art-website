@@ -41,6 +41,7 @@ const imageInfoObject = await $fetch('/api/getImageInfo', {
     }) || {"name":undefined,"description":undefined}
 const imageTitle = ref(imageInfoObject.name)
 const imageDescription = ref(imageInfoObject.description)
+const imageStatus = ref(imageInfoObject.status)
 
 onKeyStroke('Escape', () => {
   router.push('/')
@@ -89,7 +90,10 @@ onMounted(() => {
           <template #description>
             <p class="bottom-menu-description">
               <!-- A name should be placed here? -->
-               <p>{{ imageTitle }}</p>
+               <p>
+                {{ imageTitle }} 
+               </p>
+               
             </p>
           </template>
           <!-- Filters -->
@@ -99,6 +103,15 @@ onMounted(() => {
                 v-if="!filter"
                 class="flex gap-x-2 items-center"
               >
+              <UBadge color="green" variant="outline"
+                v-if="(imageStatus!='sold')">
+                Unsold: ${{imageStatus}}
+              </UBadge>
+              <UBadge color="amber" variant="outline"
+                v-if="(imageStatus=='sold')">
+                Sold!
+              </UBadge>
+
                 <!-- back to gallery (desktop & not the first or last image) -->
                 <UTooltip
                   v-if="!(isFirstImg || isLastImg) || isSmallScreen"
@@ -134,9 +147,9 @@ onMounted(() => {
                     />
                   </UModal>
 
-                  <UTooltip text="Edit metadata">
+                  <UTooltip text="Edit metadata"
+                  v-if="loggedIn">
                     <UButton
-                      v-if="loggedIn"  
                       variant="ghost"
                       color="green"
                       size="md"
@@ -144,9 +157,6 @@ onMounted(() => {
                       aria-label="Open metadata editor"
                       class="hidden lg:flex"
                       @click="isEditing = true"
-                    />
-                    <UButton
-                      v-else
                     />
                   </UTooltip>
 

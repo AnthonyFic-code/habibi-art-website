@@ -1,14 +1,24 @@
-# NuxtHub Image Gallery Starter Template
+# [Lindenhurst CC Art Website](http://www.lindycc.org/)
+A modified version of the [Nuxt image gallery](https://github.com/Flosciante/nuxt-image-gallery)
 
-This starter lets you get started with [NuxtHub Blob](https://hub.nuxt.com/docs/storage/blob) in seconds.
+View on https://habibi-art-website.pages.dev/
+
+This website is for the Lindenhurst Computer Club's Art Website, where funds are raised for the club's annual scholarships.
+To purchase a physical work, you must contact the artist on Instagram or in-person. To my knowledge, deliveries have only happened in person. If you're not in the area, my apologies.
+
+
+This repository is seperate from the production webpage and as such has not been updated recently. If any changes need to be made, feel free to message me or create an issue.
+
+
+
+ # Below is the README for the original repository
+
 
 https://github.com/Flosciante/nuxt-image-gallery/assets/904724/6e2bafdf-f5a0-42cf-b1f8-1d11c6ec919f
 
 ## Features
 
 - 📷 Image upload and display with [`hubBlob()`](http://hub.nuxt.com/docs/storage/blob)
-- 🖼️ Image Filters: Apply a variety of filters to your images.
-- 💾 Saving: Save your images with applied filters.
 - 🌐 Cloud Storage: Blob powered by NuxtHub (cloudflare R2).
 - 🎠 Custom Carousel: Includes a custom carousel component that can be adapted for in-house use.
 - 🏃🏻 [View transition API](https://developer.chrome.com/docs/web-platform/view-transitions) The View Transitions API provides a mechanism for easily creating animated transitions between different DOM states while also updating the DOM contents in a single step.
